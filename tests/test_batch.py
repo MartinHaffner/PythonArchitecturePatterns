@@ -27,6 +27,16 @@ def test_allocate_order_to_batch():
     assert batch.remaining_size == 18
 
 
+def test_allocate_order_to_batch_equal_size():
+    order_line, batch = _make_same_sku_items("RED-CHAIR", 20, 20)
+    assert batch.can_allocate(order_line) is True
+    batch.allocate_order_to_batch(order_line=order_line)
+    assert batch.reference == batch.reference
+    assert batch.sku == batch.sku
+    assert batch.initial_size == 20
+    assert batch.remaining_size == 0
+
+
 def test_allocate_order_to_batch_mismatching_sku():
     order_line = OrderLine(order_id="12345", sku="RED-CHAIR", number=2)
     batch = Batch(reference="b123", sku="BLUE-CHAIR", initial_size=20)
@@ -53,3 +63,22 @@ def test_allocate_order_to_batch_twice():
     assert batch.can_allocate(order_line) is False
     with pytest.raises(ValueError):
         batch.allocate_order_to_batch(order_line=order_line)
+
+
+def test_deallocate_order_from_batch():
+    order_line, batch = _make_same_sku_items("RED-CHAIR", 2, 20)
+    batch.allocate_order_to_batch(order_line=order_line)
+    assert batch.can_dealllocate(order_line) is True
+    batch.deallocate_order_from_batch(order_line=order_line)
+    assert batch.reference == batch.reference
+    assert batch.sku == batch.sku
+    assert batch.initial_size == 20
+    assert batch.remaining_size == 20
+    assert batch.can_dealllocate(order_line) is False
+
+
+def test_deallocate_order_never_allocated():
+    order_line, batch = _make_same_sku_items("RED-CHAIR", 2, 20)
+    assert batch.can_dealllocate(order_line) is False
+    with pytest.raises(ValueError):
+        batch.deallocate_order_from_batch(order_line=order_line)
