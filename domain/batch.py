@@ -29,6 +29,9 @@ class Batch:
             return False
         return self.eta < other.eta
 
+    def __gt__(self, other: "Batch") -> bool:
+        return not self.__lt__(other)
+
     def can_allocate(self, order_line: OrderLine) -> bool:
         if self.sku != order_line.sku:
             return False
