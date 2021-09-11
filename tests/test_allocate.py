@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 
+import pytest
 from domain.batch import Batch
 from domain.order import OrderLine
-from domain.service import allocate
+from domain.service import OutOfStock, allocate
 
 
 def test_allocate_one_batch():
@@ -59,3 +60,19 @@ def test_allocate_multiple_different_on_the_way():
     assert batch_due_today.remaining_size == 20
     assert batch_due_tomorrow.remaining_size == 18
     assert batch_due_later.remaining_size == 20
+
+
+def test_allocate_order_to_batch_mismatching_sku():
+    order_line = OrderLine(order_id="12345", sku="RED-CHAIR", number=2)
+    batch = Batch(reference="b123", sku="BLUE-CHAIR", initial_size=20)
+    with pytest.raises(OutOfStock):
+        _ = allocate(order_line, [batch])
+
+
+def test_allocate_order_to_batch_impossible():
+    order_line = OrderLine(order_id="12345", sku="BLUE-CHAIR", number=20)
+    batch = Batch(reference="b123", sku="BLUE-CHAIR", initial_size=20)
+    result = allocate(order_line, [batch])
+    assert result == batch.reference
+    with pytest.raises(OutOfStock):
+        _ = allocate(order_line, [batch])

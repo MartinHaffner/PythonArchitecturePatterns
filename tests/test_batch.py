@@ -1,4 +1,3 @@
-import pytest
 from domain.batch import Batch
 from domain.order import OrderLine
 
@@ -41,15 +40,15 @@ def test_allocate_order_to_batch_mismatching_sku():
     order_line = OrderLine(order_id="12345", sku="RED-CHAIR", number=2)
     batch = Batch(reference="b123", sku="BLUE-CHAIR", initial_size=20)
     assert batch.can_allocate(order_line) is False
-    with pytest.raises(ValueError):
-        batch.allocate_order_to_batch(order_line=order_line)
+    batch.allocate_order_to_batch(order_line=order_line)
+    assert batch.remaining_size == 20
 
 
 def test_allocate_order_to_batch_insuffcient_number():
     order_line, batch = _make_same_sku_items("RED-CHAIR", 25, 20)
     assert batch.can_allocate(order_line) is False
-    with pytest.raises(ValueError):
-        batch.allocate_order_to_batch(order_line=order_line)
+    batch.allocate_order_to_batch(order_line=order_line)
+    assert batch.remaining_size == 20
 
 
 def test_allocate_order_to_batch_twice():
@@ -61,8 +60,8 @@ def test_allocate_order_to_batch_twice():
     assert batch.remaining_size == 18
     assert batch.initial_size == 20
     assert batch.can_allocate(order_line) is False
-    with pytest.raises(ValueError):
-        batch.allocate_order_to_batch(order_line=order_line)
+    batch.allocate_order_to_batch(order_line=order_line)
+    assert batch.remaining_size == 18
 
 
 def test_deallocate_order_from_batch():
@@ -80,5 +79,5 @@ def test_deallocate_order_from_batch():
 def test_deallocate_order_never_allocated():
     order_line, batch = _make_same_sku_items("RED-CHAIR", 2, 20)
     assert batch.can_dealllocate(order_line) is False
-    with pytest.raises(ValueError):
-        batch.deallocate_order_from_batch(order_line=order_line)
+    batch.deallocate_order_from_batch(order_line=order_line)
+    assert batch.remaining_size == 20

@@ -43,7 +43,7 @@ class Batch:
 
     def allocate_order_to_batch(self, order_line: OrderLine) -> None:
         if not self.can_allocate(order_line):
-            raise ValueError("Cannot allocate this order_line to this batch")
+            return
         self.remaining_size -= order_line.number
         self.allocated.add(order_line.order_id)
 
@@ -54,6 +54,6 @@ class Batch:
 
     def deallocate_order_from_batch(self, order_line: OrderLine) -> None:
         if not self.can_dealllocate(order_line):
-            raise ValueError("Cannot deallocate this order_line from this batch")
+            return
         self.remaining_size += order_line.number
         self.allocated.remove(order_line.order_id)
