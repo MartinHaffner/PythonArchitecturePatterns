@@ -9,7 +9,7 @@ class Batch:
     sku: str
     initial_size: int
     remaining_size: int
-    allocated: Set[str]
+    allocated: Set[OrderLine]
     eta: Optional[datetime]
 
     def __init__(
@@ -32,12 +32,17 @@ class Batch:
     def __gt__(self, other: "Batch") -> bool:
         return not self.__lt__(other)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Batch):
+            return False
+        return self.reference == other.reference
+
     def can_allocate(self, order_line: OrderLine) -> bool:
         if self.sku != order_line.sku:
             return False
         if self.remaining_size < order_line.number:
             return False
-        if order_line.order_id in self.allocated:
+        if order_line in self.allocated:
             return False
         return True
 
@@ -45,10 +50,10 @@ class Batch:
         if not self.can_allocate(order_line):
             return
         self.remaining_size -= order_line.number
-        self.allocated.add(order_line.order_id)
+        self.allocated.add(order_line)
 
     def can_dealllocate(self, order_line: OrderLine) -> bool:
-        if order_line.order_id in self.allocated:
+        if order_line in self.allocated:
             return True
         return False
 
@@ -56,4 +61,4 @@ class Batch:
         if not self.can_dealllocate(order_line):
             return
         self.remaining_size += order_line.number
-        self.allocated.remove(order_line.order_id)
+        self.allocated.remove(order_line)
