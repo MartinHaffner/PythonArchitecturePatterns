@@ -34,7 +34,7 @@ allocations = Table(
 )
 
 
-def start_mappers() -> None:
+def start_mappers():
     order_lines_mapper = mapper_registry.map_imperatively(OrderLine, order_lines)
     mapper_registry.map_imperatively(
         Batch,
