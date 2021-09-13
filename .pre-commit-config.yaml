@@ -27,7 +27,6 @@ repos:
     hooks:
       - id: mypy
         verbose: true
-        files: domain repository
         additional_dependencies:
           - 'pydantic'
         args: [--config=hook_configs/mypy.ini]
